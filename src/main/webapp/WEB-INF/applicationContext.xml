@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" 
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:alias="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	   		http://www.springframework.org/schema/context
+	   		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	   		http://www.springframework.org/schema/tx 
+			http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+			http://www.springframework.org/schema/mvc 
+			http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+ 
+	<context:annotation-config />
+
+	<context:component-scan base-package="pl.sda.*" />
+	<mvc:annotation-driven />
+
+	<context:property-placeholder location="classpath:config.properties" />
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource"
+		p:basename="Messages" />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	<bean id="transactionManager" 
+        class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+	  <property name="dataSource" ref="dataSource" />
+	  <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="clientDao" class="pl.sda.dao.ClientDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+		<constructor-arg ref="client"/>
+	</bean>
+
+   <bean id="client" class="pl.sda.model.Client"/>
+   
+   <bean id="clientAccountDao" class="pl.sda.dao.ClientAccountDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+		<constructor-arg ref="clientAccount"/>
+	</bean>
+
+   <bean id="clientAccount" class="pl.sda.model.ClientAccount"/>
+   
+    <bean id="depositDao" class="pl.sda.dao.DepositDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+		<constructor-arg ref="deposit"/>
+	</bean>
+
+   <bean id="deposit" class="pl.sda.model.Deposit"/>
+   
+   <bean id="userDao" class="pl.sda.dao.UserDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+		<constructor-arg ref="user"/>
+	</bean>
+
+   <bean id="user" class="pl.sda.model.User"/>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+			</props>
+		</property>
+		<property name="packagesToScan" value="pl.sda.*"></property>
+	</bean>
+
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
+		p:username="${jdbc.username}" p:password="${jdbc.password}" />
+</beans>
